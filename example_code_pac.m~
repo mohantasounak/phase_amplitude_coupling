@@ -1,0 +1,279 @@
+%%
+restoredefaultpath
+addpath /Users/sounakmohanta/Desktop/sounak/softwares/fieldtrip-20200826
+ft_defaults
+path(path,genpath('/Users/sounakmohanta/Downloads/ERSP/ECoG/scripts'));
+
+%% user inputs
+area_oi = 'LatTemp';
+
+%% load data
+load data.mat
+
+%% define phase bins
+nbin = 18; % number of phase bins
+position=zeros(1,nbin); % this variable will get the beginning (not the center) of each phase bin (in rads)
+winsize = 2*pi/nbin;
+for j=1:nbin 
+    position(j) = -pi+(j-1)*winsize; 
+end
+
+%% PAC for each unique area name
+unique_labels = unique(data.label2(:, 3))
+pfreq = [7 12]
+afreq = [60 200]
+for jitu =1:length(unique_labels)
+
+%% select area of interest channels
+choi = [];
+choi =  find(strcmp(data.label2(:, 3), unique_labels{jitu}) == 1)
+cfg = [] ;
+cfg.channel =  ft_channelselection(choi, data);
+data_aoi = ft_selectdata(cfg, data); 
+
+%% zero-mean time series
+cfg = [];
+cfg.demean          = 'yes';
+cfg.baselinewindow  = 'all';
+
+data_aoi_dm      = ft_preprocessing(cfg, data_aoi);
+data_aoi_dm.label2 = data_aoi.label2;
+
+
+
+
+PhaseFreqVector = frequencyranges(1:22, :); % phase vector is [4 30]
+AmpFreqVector = frequencyranges; % amplitude vector is 4 200]
+
+%% calculate comulodogram for each channel
+tic
+parfor knj =1:size(data_aoi_dm.label  , 1)
+    
+    % average over trials
+    tort_A1     = [];
+    cfg = [];
+    cfg.channel     = ft_channelselection(knj, (data_aoi_dm.label));
+    cfg.avgoverrpt  = 'yes';
+    tort_A1         = ft_selectdata(cfg, data_aoi_dm);
+    tort_A1.label2 = data_aoi_dm.label2(knj, :)
+
+%% Tort
+
+
+
+% 
+PhaseFreq_BandWidth=4;
+AmpFreq_BandWidth=20;
+
+% 
+PhaseFreqVector = frequencyranges(1:22, :);
+AmpFreqVector = frequencyranges;
+% PhaseFreq_BandWidth = PhaseFreqVector/4;
+% AmpFreq_BandWidth = AmpFreqVector/8;
+
+% PhaseFreq_BandWidth=4;
+% AmpFreq_BandWidth=20;
+% 
+nbin = 18
+%% plot comodulogram
+[position1, comodulogram_A1(knj, :, :), comodulogram_A1_swap(knj, :, :)] = tort_cal1(tort_A1, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A1', strcat(unique_labels{jitu}, ":", tort_A1.label2(:, 1)) );
+end
+end
+toc
+%% plot
+area_id = find(contains(unique_labels, area_oi) == 1)
+conf =[];
+confi.PhaseFreqVector       = PhaseFreqVector    ;
+confi.AmpFreqVector         = AmpFreqVector;
+confi.PhaseFreq_BandWidth   = abs(PhaseFreqVector(:, 1) - PhaseFreqVector(:, 2));
+confi.AmpFreq_BandWidth     = abs(AmpFreqVector(:, 1) - AmpFreqVector(:, 2));
+
+
+confi.color_axis            = [0 0.003];
+confi.ylimit                = [20 200];
+confi.xlimit                = [4 30];
+confi.toi                   = toi;
+confi.area_name             = unique_labels{jitu};
+co
+[plot_com] = plot_comodulogram(confi, squeeze(comodulogram_A1(id, :, :)) - squeeze(comodulogram_A1_swap(id, :, :)), 'A2V2');
+%%
+
+
+%% calculate bar plot tort for each channel
+for knj =1:size(data_reref_WM_deleted_correct_50_A1_3.label  , 1)
+    tort_A1     = [];
+    tort_A2     = [];
+    tort_A3     = [];
+    cfg = [];
+    cfg.channel     = ft_channelselection(knj, (data_reref_WM_deleted_correct_50_A1_4.label));
+    cfg.avgoverrpt  = 'yes';
+    tort_A1         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A1_4);
+    tort_A2         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A2_4);
+    tort_A3         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A3_4);
+    tort_A         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_4);
+
+    tort_A1.label2 = data_reref_WM_deleted_correct_50_A1_4.label2(knj, :)
+    tort_A2.label2 = data_reref_WM_deleted_correct_50_A2_4.label2(knj, :)
+    tort_A3.label2 = data_reref_WM_deleted_correct_50_A3_4.label2(knj, :)
+    tort_A.label2 = data_reref_WM_deleted_correct_50_4.label2(knj, :)
+
+%% Tort
+
+
+%% Define the amplitude- and phase-frequencies
+
+PhaseFreqVector=2:2:50;
+AmpFreqVector=10:5:200;
+% 
+PhaseFreq_BandWidth=4;
+AmpFreq_BandWidth=20;
+% PhaseFreq_BandWidth = PhaseFreqVector/4;
+% AmpFreq_BandWidth = AmpFreqVector/8;
+
+% 
+% PhaseFreqVector = frequencyranges(1:22, :);
+% AmpFreqVector = frequencyranges;
+
+% PhaseFreq_BandWidth=4;
+% AmpFreq_BandWidth=20;
+% 
+nbin = 18
+
+% [pp1] = tort_cal2(data_trial_avg_A1,[8 20], [80 120], position1, 'A1', unique_labels{jitu})
+% [pp2] = tort_cal2(data_trial_avg_A2,[8 20], [80 120], position2, 'A2', unique_labels{jitu})
+% [pp3] = tort_cal2(data_trial_avg_A3,[8 20], [80 120], position3, 'A3', unique_labels{jitu})
+[pp1(knj, :), MI_1(knj)] = tort_cal2(tort_A1,[7 12], [80 160], position, 'A1', unique_labels{jitu});
+[pp2(knj, :), MI_2(knj)] = tort_cal2(tort_A2,[7 12], [80 160], position, 'A2', unique_labels{jitu});
+% [pp3(knj, :), MI_3] = tort_cal2(tort_A3,[7 12], [60 160], position, 'A3', unique_labels{jitu});
+% [pp4(knj, :), MI] = tort_cal2(tort_A,[7 12], [60 160], position, 'all A', unique_labels{jitu});
+
+end
+
+
+%% tort calculated at each trial, channel level
+% for knj =1:size(data_reref_WM_deleted_correct_50_A1_3.label  , 1)
+%     tort_A1     = [];
+%     tort_A2     = [];
+%     tort_A3     = [];
+%     cfg = [];
+%     cfg.channel     = ft_channelselection(knj, (data_reref_WM_deleted_correct_50_A1_4.label));
+%     cfg.avgoverrpt  = 'no';
+%     tort_A1         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A1_4);
+%     tort_A2         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A2_4);
+%     tort_A3         = ft_selectdata(cfg, data_reref_WM_deleted_correct_50_A3_4);
+% 
+%     tort_A1.label2 = data_reref_WM_deleted_correct_50_A1_4.label2(knj, :)
+%     tort_A2.label2 = data_reref_WM_deleted_correct_50_A2_4.label2(knj, :)
+%     tort_A3.label2 = data_reref_WM_deleted_correct_50_A3_4.label2(knj, :)
+% 
+% %% Tort
+% 
+% for ddd = 1:3
+%     if ddd == 1
+%         tort_A = tort_A1;
+%     elseif ddd == 2 
+%         tort_A = tort_A2;
+%     else
+%         tort_A = tort_A3;
+%     end
+%     
+%         
+% for trial = 1:size(tort_A.trial, 2)
+%     
+%     cfg = [];
+%     cfg.trials     =trial;
+%     tort_AA         = ft_selectdata(cfg, tort_A);
+% 
+% %% Define the amplitude- and phase-frequencies
+% 
+% PhaseFreqVector=2:2:50;
+% AmpFreqVector=10:5:200;
+% % 
+% % PhaseFreq_BandWidth=4;
+% % AmpFreq_BandWidth=20;
+% PhaseFreq_BandWidth = PhaseFreqVector/4;
+% AmpFreq_BandWidth = AmpFreqVector/8;
+% 
+% % 
+% % PhaseFreqVector = frequencyranges(1:22, :);
+% % AmpFreqVector = frequencyranges;
+% 
+% % PhaseFreq_BandWidth=4;
+% % AmpFreq_BandWidth=20;
+% % 
+% nbin = 18
+% % % % % % plot comodulogram
+% % % % % % [position1] = tort_cal1(data_trial_avg_A1, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A1', unique_labels{jitu})
+% % % % % % [position2] = tort_cal1(data_trial_avg_A2, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A2', unique_labels{jitu})
+% % % % % % [position3] = tort_cal1(data_trial_avg_A3, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A3', unique_labels{jitu})
+% % [position1, comodulogram_A1(knj, :, :), comodulogram_A1_swap(knj, :, :)] = tort_cal1(tort_A1, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A1', strcat(unique_labels{jitu}, ":", tort_A1.label2(:, 1)) );
+% % [position2, comodulogram_A2(knj, :, :), comodulogram_A2_swap(knj, :, :)] = tort_cal1(tort_A2, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A2', strcat(unique_labels{jitu}, ":", tort_A2.label2(:, 1)));
+% % [position3, comodulogram_A3(knj, :, :), comodulogram_A3_swap(knj, :, :)] = tort_cal1(tort_A3, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A3', strcat(unique_labels{jitu}, ":", tort_A3.label2(:, 1)));
+% % [position, comodulogram_A(knj, :, :), comodulogram_A_swap(knj, :, :)] = tort_cal1(tort_A, nbin, PhaseFreqVector, AmpFreqVector,PhaseFreq_BandWidth, AmpFreq_BandWidth, 'A3', strcat(unique_labels{jitu}, ":", tort_A3.label2(:, 1)));
+% % plot bar plot
+% 
+% 
+% 
+% 
+% 
+% % [pp1] = tort_cal2(data_trial_avg_A1,[8 20], [80 120], position1, 'A1', unique_labels{jitu})
+% % [pp2] = tort_cal2(data_trial_avg_A2,[8 20], [80 120], position2, 'A2', unique_labels{jitu})
+% % [pp3] = tort_cal2(data_trial_avg_A3,[8 20], [80 120], position3, 'A3', unique_labels{jitu})
+% [pp4{ddd}(knj, :, trial)] = tort_cal2(tort_AA,[7 12], [60 160], position, 'all A', unique_labels{jitu});
+% 
+% end
+% end
+% end
+
+
+
+
+end
+
+
+pp1 = mean(pp4{1}, 3);
+pp2 = mean(pp4{2}, 3);
+pp3 = mean(pp4{3}, 3);
+%% plot bar
+confi =[];
+confi.ylimit = [0.03 .1];
+confi.pf1 = pfreq(1) ;
+confi.pf2 = pfreq(2);
+confi.af1 = afreq(1);
+confi.af2 = afreq(2);
+[p] = plot_tort(confi, pp1, MI_1, 'A2V2');
+[p] = plot_tort(confi, pp2, MI_2, 'A2notV2');
+[p] = plot_tort(confi, pp3, 'A3');
+[p] = plot_tort(confi, pp4, 'all A');
+
+for i =1:size(pp1, 1)
+[p] = plot_tort(confi, pp1(i, :), 'A1');
+[p] = plot_tort(confi, pp2(i, :), 'A2');
+[p] = plot_tort(confi, pp3(i, :), 'A3');
+end
+
+
+%% plot comodulogram
+conf =[];
+confi.PhaseFreqVector       = PhaseFreqVector    ;
+confi.AmpFreqVector         = AmpFreqVector;
+% confi.PhaseFreq_BandWidth   = PhaseFreq_BandWidth;
+% confi.AmpFreq_BandWidth     = AmpFreq_BandWidth;
+confi.PhaseFreq_BandWidth   = abs(PhaseFreqVector(:, 1) - PhaseFreqVector(:, 2));
+confi.AmpFreq_BandWidth     = abs(AmpFreqVector(:, 1) - AmpFreqVector(:, 2));
+
+
+confi.color_axis            = [0 0.003];
+confi.ylimit                = [20 200];
+confi.xlimit                = [4 30];
+confi.toi                   = toi;
+confi.area_name             = unique_labels{jitu};
+
+[plot_com] = plot_comodulogram(confi, comodulogram_A1-comodulogram_A1_swap, 'A2V2');
+[plot_com] = plot_comodulogram(confi, comodulogram_A2-comodulogram_A2_swap, 'A2notV2');
+[plot_com] = plot_comodulogram(confi, comodulogram_A3-comodulogram_A3_swap, 'A3');
+[plot_com] = plot_comodulogram(confi, comodulogram_A-comodulogram_A_swap, 'all A');
+
+[plot_com] = plot_comodulogram(confi, comodulogram_A1, 'A1');
+[plot_com] = plot_comodulogram(confi, comodulogram_A2, 'A2')
+[plot_com] = plot_comodulogram(confi, comodulogram_A3, 'A3')
