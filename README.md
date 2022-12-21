@@ -21,4 +21,6 @@ Step 5: Run example_code_pac.m
 # Data description
 Electrocorticigraphy (ECoG) dataset with 5 grid electrodes (data.label). Registered to Human Connectome Project atlas (data.label2). Data in Fieldtrip format.
 
+Freqranges: Frequency bands for Hilbert transform according to Voytek et al. 2013.
+
 
