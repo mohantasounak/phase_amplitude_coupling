@@ -1,7 +1,7 @@
 # phase_amplitude_coupling
 Calculates and plots phase amplitude coupling of neural time series data
 
-This script (tested on Matlab 2018a) uses the Fieldtrip toolbox (Oostenveld et al. 2011), . Analysis pipeline adapted from Tort et al. 2010 and https://github.com/tortlab
+This script (tested on Matlab 2018a) uses the Fieldtrip toolbox (Oostenveld et al. 2011). Analysis pipeline adapted from Tort et al. 2010 and https://github.com/tortlab
 
 # Installation
 Step 1: Download Fieldtrip from https://www.fieldtriptoolbox.org/download/
